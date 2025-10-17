@@ -5,14 +5,23 @@ import Register from './components/Auth/Register';
 import Dashboard from './components/Dashboard/Dashboard';
 import TaskList from './components/Tasks/TaskList';
 import PrivateRoute from './components/layout/PrivateRoute';
+import PublicRoute from './components/layout/PublicRoute';
 
 const App = () => {
   return (
     <AuthProvider>
       <Router>
         <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          } />
+          <Route path="/register" element={
+            <PublicRoute>
+              <Register />
+            </PublicRoute>
+          } />
           <Route 
             path="/dashboard" 
             element={
