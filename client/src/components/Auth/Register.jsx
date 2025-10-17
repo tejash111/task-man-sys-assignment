@@ -2,21 +2,24 @@ import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-const Login = () => {
-  const [formData, setFormData] = useState({ email: '', password: '' });
+const Register = () => {
+  const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const [error, setError] = useState('');
-  const [loading,setLoading]=useState(false)
-  const { login } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const { register } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
     try {
-      await login(formData);
+      await register(formData);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+      setError(err.response?.data?.message || 'Registration failed');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -25,13 +28,13 @@ const Login = () => {
       <div className="max-w-md w-full">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Welcome Back</h1>
-          <p className="text-gray-400">Sign in to continue to your account</p>
+          <h1 className="text-4xl font-bold text-white mb-2">Create Account</h1>
+          <p className="text-gray-400">Join us and start managing your tasks</p>
         </div>
 
-        {/* Login Card */}
+        {/* Register Card */}
         <div className="bg-gray-800 rounded-lg shadow-2xl p-8 border border-gray-700">
-          <h2 className="text-2xl font-semibold text-white mb-6">Login</h2>
+          <h2 className="text-2xl font-semibold text-white mb-6">Register</h2>
           
           {/* Error Message */}
           {error && (
@@ -41,6 +44,22 @@ const Login = () => {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Name Input */}
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
+                Full Name
+              </label>
+              <input
+                id="name"
+                type="text"
+                placeholder="Enter your full name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                required
+                className="w-full px-4 py-3 bg-gray-900 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent transition duration-200"
+              />
+            </div>
+
             {/* Email Input */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
@@ -65,7 +84,7 @@ const Login = () => {
               <input
                 id="password"
                 type="password"
-                placeholder="Enter your password"
+                placeholder="Create a password"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
@@ -79,19 +98,19 @@ const Login = () => {
               disabled={loading}
               className="w-full py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? 'Creating Account...' : 'Create Account'}
             </button>
           </form>
 
-          {/* Register Link */}
+          {/* Login Link */}
           <div className="mt-6 text-center">
             <p className="text-gray-400 text-sm">
-              Don't have an account?{' '}
+              Already have an account?{' '}
               <a
-                href="/register"
+                href="/login"
                 className="text-white font-medium hover:underline transition duration-200"
               >
-                Create one now
+                Sign in here
               </a>
             </p>
           </div>
@@ -108,4 +127,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register;
