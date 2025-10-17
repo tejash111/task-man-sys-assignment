@@ -4,7 +4,7 @@ const createTask = async (req, res) => {
     try {
         const { title, description, priority, dueDate, status } = req.body
 
-       
+
 
         const newTask = await Task.create({
             title,
@@ -127,48 +127,41 @@ const deleteTask = async (req, res) => {
 }
 
 const getTaskStats = async (req, res) => {
-  try {
-    const userId = req.user._id;
+    try {
+        const userId = req.user._id;
 
-    const allTasks = await Task.find({ userId });
+        const allTasks = await Task.find({ userId });
 
-    if (allTasks && allTasks.length > 0) {
-      const totalTasks = allTasks.length;
-      const completedTasks = allTasks.filter(
-        (task) => task.status === "Completed"
-      ).length;
-      const pendingTasks = allTasks.filter(
-        (task) => task.status === "Todo" || task.status === "In Progress"
-      ).length;
+        const totalTasks = allTasks.length;
+        const completedTasks = allTasks.filter(
+            (task) => task.status === "Completed"
+        ).length;
+        const pendingTasks = allTasks.filter(
+            (task) => task.status === "Todo" || task.status === "In Progress"
+        ).length;
 
-      const priorityBreakdown = {
-        Low: allTasks.filter((task) => task.priority === "Low").length,
-        Medium: allTasks.filter((task) => task.priority === "Medium").length,
-        High: allTasks.filter((task) => task.priority === "High").length,
-      };
+        const priorityBreakdown = {
+            Low: allTasks.filter((task) => task.priority === "Low").length,
+            Medium: allTasks.filter((task) => task.priority === "Medium").length,
+            High: allTasks.filter((task) => task.priority === "High").length,
+        };
 
-      return res.status(201).json({
-        success: true,
-        message: "Fetched detailed task statistics successfully",
-        stats: {
-          totalTasks,
-          completedTasks,
-          pendingTasks,
-          priorityBreakdown,
-        },
-      });
-    } else {
-      return res.status(404).json({
-        success: false,
-        message: "No tasks found for this user",
-      });
+        return res.status(200).json({
+            success: true,
+            message: totalTasks > 0 ? "Fetched detailed task statistics successfully" : "No tasks found, showing empty stats",
+            stats: {
+                totalTasks,
+                completedTasks,
+                pendingTasks,
+                priorityBreakdown,
+            },
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
 };
 
 
-export { createTask, getAllTask, getSingleTask, updateTask, deleteTask ,getTaskStats }
+export { createTask, getAllTask, getSingleTask, updateTask, deleteTask, getTaskStats }
 
 

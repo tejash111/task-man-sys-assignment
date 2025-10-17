@@ -10,7 +10,7 @@ const api = axios.create({
     },
 });
 
-// Auth API
+
 export const authAPI = {
     register: (userData) => api.post('/auth/register', userData),
     login: (userData) => api.post('/auth/login', userData),
@@ -18,7 +18,6 @@ export const authAPI = {
     getProfile: () => api.get('/auth/getuser'),
 };
 
-// Task API
 export const taskAPI = {
     getAllTasks: () => api.get('/tasks'),
     createTask: (taskData) => api.post('/tasks', taskData),

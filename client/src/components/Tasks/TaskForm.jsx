@@ -39,12 +39,8 @@ const TaskForm = ({ task, onTaskSaved, onCancel }) => {
   };
 
   return (
-    <div style={{ 
-      border: '1px solid #ddd', 
-      padding: '20px', 
-      marginBottom: '20px', 
-      borderRadius: '5px',
-      backgroundColor: '#f9f9f9'
+    <div className='backdrop-blur-2xl' style={{ 
+      
     }}>
       <h3>{task ? 'Edit Task' : 'Create New Task'}</h3>
       {error && <p style={{ color: 'red' }}>{error}</p>}

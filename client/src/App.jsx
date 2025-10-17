@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthContext';
 import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
 import Dashboard from './components/Dashboard/Dashboard';
+import TaskList from './components/Tasks/TaskList';
 import PrivateRoute from './components/layout/PrivateRoute';
 
 const App = () => {
@@ -17,6 +18,14 @@ const App = () => {
             element={
               <PrivateRoute>
                 <Dashboard />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/tasks" 
+            element={
+              <PrivateRoute>
+                <TaskList />
               </PrivateRoute>
             } 
           />

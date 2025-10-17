@@ -1,13 +1,20 @@
 import { useState, useEffect } from 'react';
 import { taskAPI } from '../../services/api';
-import TaskItem from './TaskItem';
-import TaskForm from './TaskForm';
+import Sidebar from '../layout/Sidebar';
+import Header from '../layout/Header';
+import TaskCard from './TaskCard';
+import TaskModal from './TaskModal';
+import { LayoutGrid, List, LoaderCircle } from 'lucide-react';
+import TaskFilters from './TaskFIlters';
 
 const TaskList = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
+  const [view, setView] = useState('board');
+  const [filters, setFilters] = useState({ priority: 'All', status: 'All' });
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     fetchTasks();
@@ -15,10 +22,12 @@ const TaskList = () => {
 
   const fetchTasks = async () => {
     try {
+      console.log('TaskList: Fetching tasks...');
       const response = await taskAPI.getAllTasks();
+      console.log('TaskList: Tasks response:', response.data);
       setTasks(response.data.tasks || []);
     } catch (error) {
-      console.error('Error fetching tasks:', error);
+      console.error('TaskList: Error fetching tasks:', error);
     } finally {
       setLoading(false);
     }
@@ -37,53 +46,215 @@ const TaskList = () => {
 
   const handleEdit = (task) => {
     setEditingTask(task);
-    setShowForm(true);
+    setShowModal(true);
   };
 
   const handleTaskSaved = () => {
-    setShowForm(false);
+    setShowModal(false);
     setEditingTask(null);
     fetchTasks();
   };
 
-  if (loading) return <div>Loading...</div>;
+  const getFilteredTasks = () => {
+    return tasks.filter(task => {
+      const priorityMatch = filters.priority === 'All' || task.priority === filters.priority;
+      const statusMatch = filters.status === 'All' || task.status === filters.status;
+      
+      const searchMatch = searchQuery === '' || 
+        task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (task.description && task.description.toLowerCase().includes(searchQuery.toLowerCase()));
+      
+      return priorityMatch && statusMatch && searchMatch;
+    });
+  };
+
+  const getTasksByStatus = (status) => {
+    const filteredTasks = getFilteredTasks();
+    return filteredTasks.filter(task => task.status === status);
+  };
+
+  const columns = [
+    { id: 'Todo', title: 'To Do', color: 'blue', tasks: getTasksByStatus('Todo') },
+    { id: 'In Progress', title: 'In Progress', color: 'orange', tasks: getTasksByStatus('In Progress') },
+    { id: 'Completed', title: 'Completed', color: 'green', tasks: getTasksByStatus('Completed') },
+  ];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-full my-auto ">
+        <div className="text-gray-500 flex items-center my-auto mt-25"><LoaderCircle className='animate-spin'/></div>
+      </div>
+    );
+  }
 
   return (
-    <div style={{ padding: '20px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h2>My Tasks</h2>
-        <button 
-          onClick={() => { setShowForm(!showForm); setEditingTask(null); }}
-          style={{ padding: '10px 20px', backgroundColor: '#007bff', color: 'white', border: 'none', cursor: 'pointer', borderRadius: '5px' }}
-        >
-          {showForm ? 'Cancel' : 'Add Task'}
-        </button>
+    <div className="flex h-screen overflow-hidden bg-gray-50">
+      <Sidebar />
+
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Header searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+        <main className="flex-1 overflow-hidden">
+          <div className="h-full flex flex-col bg-gray-50">
+            {/* Header */}
+            <div className="bg-white border-b border-gray-200 px-8 py-4">
+              <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-gray-900">Tasks</h1>
+                <button
+                  onClick={() => { setEditingTask(null); setShowModal(true); }}
+                  className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2"
+                >
+                  <span className="text-lg">+</span>
+                  <span>Create Task</span>
+                </button>
+              </div>
+
+
+              <TaskFilters
+                filters={filters} 
+                onFilterChange={setFilters} 
+              />
+
+              {/* View Toggle */}
+              <div className="flex items-center gap-4 mt-4">
+                <button
+                  onClick={() => setView('board')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                    view === 'board'
+                      ? 'bg-gray-900 text-white font-medium'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  <LayoutGrid size={18} />
+                  <span>Board View</span>
+                </button>
+                <button
+                  onClick={() => setView('list')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                    view === 'list'
+                      ? 'bg-gray-900 text-white font-medium'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  <List size={18} />
+                  <span>List View</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Board/List View Content */}
+            <div className="flex-1 overflow-x-auto p-8">
+              {view === 'board' ? (
+                // Kanban Board View
+                <div className="flex gap-6 h-full">
+                  {columns.map((column) => (
+                    <div key={column.id} className="flex-1 min-w-[320px]">
+                      {/* Column Header */}
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-2 h-2 rounded-full bg-${column.color}-500`}></div>
+                          <h2 className="font-semibold text-gray-900">{column.title}</h2>
+                          <span className="text-sm text-gray-500">({column.tasks.length})</span>
+                        </div>
+                      </div>
+
+                      {/* Task Cards */}
+                      <div className="space-y-3 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 280px)' }}>
+                        {column.tasks.length === 0 ? (
+                          <div className="text-center py-8 text-gray-400 text-sm">
+                            No tasks in {column.title.toLowerCase()}
+                          </div>
+                        ) : (
+                          column.tasks.map((task) => (
+                            <TaskCard
+                              key={task._id}
+                              task={task}
+                              onEdit={handleEdit}
+                              onDelete={handleDelete}
+                            />
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="max-w-6xl mx-auto">
+                  <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          
+                    <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-gray-50 border-b border-gray-200 font-semibold text-sm text-gray-900">
+                      <div className="col-span-4">Task</div>
+                      <div className="col-span-2">Status</div>
+                      <div className="col-span-2">Priority</div>
+                      <div className="col-span-2">Due Date</div>
+                      <div className="col-span-2 text-right">Actions</div>
+                    </div>
+
+                
+                    <div className="divide-y divide-gray-200">
+                      {tasks.length === 0 ? (
+                        <div className="text-center py-12 text-gray-400">
+                          No tasks found. Create your first task!
+                        </div>
+                      ) : (
+                        tasks.map((task) => (
+                          <TaskItem
+                            key={task._id}
+                            task={task}
+                            onEdit={handleEdit}
+                            onDelete={handleDelete}
+                          />
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </main>
       </div>
 
-      {showForm && (
-        <TaskForm 
-          task={editingTask} 
+      {showModal && (
+        <TaskModal
+          task={editingTask}
+          onClose={() => { setShowModal(false); setEditingTask(null); }}
           onTaskSaved={handleTaskSaved}
-          onCancel={() => { setShowForm(false); setEditingTask(null); }}
         />
-      )}
-
-      {tasks.length === 0 ? (
-        <p>No tasks found. Create your first task!</p>
-      ) : (
-        <div>
-          {tasks.map(task => (
-            <TaskItem 
-              key={task._id} 
-              task={task} 
-              onDelete={handleDelete}
-              onEdit={handleEdit}
-            />
-          ))}
-        </div>
       )}
     </div>
   );
 };
 
 export default TaskList;
+
+
+const TaskItem = ({ task, onDelete, onEdit }) => {
+  return (
+    <div className="grid grid-cols-12 gap-4 px-6 py-4 hover:bg-gray-50 transition-colors">
+      <div className="col-span-4">
+        <h3 className="font-medium text-gray-900 mb-1">{task.title}</h3>
+        {task.description && (
+          <p className="text-sm text-gray-500 line-clamp-2">{task.description}</p>
+        )}
+      </div>
+      <div className="col-span-2 flex items-center">
+        <span className={`px-3 py-1 rounded-full text-xs font-medium ${task.status === 'Completed' ? 'bg-green-100 text-green-500' : task.status === 'In Progress' ? 'bg-yellow-100 text-yellow-500' : 'bg-blue-100 text-blue-500'}`}>
+          {task.status}
+        </span>
+      </div>
+      <div className="col-span-2 flex items-center">
+        <span className={`px-3 py-1 rounded-full text-xs font-medium ${task.priority === 'High' ? 'bg-red-100 text-red-500' : task.priority === 'Medium' ? 'bg-yellow-100 text-yellow-500' : 'bg-blue-100 text-blue-500'}`}>
+          {task.priority}
+        </span>
+      </div>
+      <div className="col-span-2 flex items-center text-sm text-gray-700">
+        {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : '-'}
+      </div>
+      <div className="col-span-2 flex items-center justify-end gap-2">
+        <button onClick={() => onEdit(task)} className="px-3 py-1.5 text-sm bg-blue-50  text-blue-500 hover:bg-blue-100 rounded transition-colors border border-blue-300">Edit</button>
+        <button onClick={() => onDelete(task._id)} className="px-3 py-1.5 text-sm text-red-500 border border-red-300 bg-red-50 hover:bg-gray-800 rounded transition-colors">Delete</button>
+      </div>
+    </div>
+  );
+};
+

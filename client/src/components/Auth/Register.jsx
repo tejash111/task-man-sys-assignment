@@ -24,29 +24,29 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 flex items-center justify-center px-4">
       <div className="max-w-md w-full">
-        {/* Header */}
+
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Create Account</h1>
-          <p className="text-gray-400">Join us and start managing your tasks</p>
+          <h1 className="text-4xl font-bold text-black mb-2">Create Account</h1>
+          <p className="text-gray-700">Join us and start managing your tasks</p>
         </div>
 
-        {/* Register Card */}
-        <div className="bg-gray-800 rounded-lg shadow-2xl p-8 border border-gray-700">
-          <h2 className="text-2xl font-semibold text-white mb-6">Register</h2>
+ 
+        <div className="bg-white border-gray-100 rounded-lg shadow-2xl p-8 border">
+          <h2 className="text-2xl font-semibold text-black mb-6">Register</h2>
           
-          {/* Error Message */}
+ 
           {error && (
-            <div className="mb-4 p-3 bg-red-900/50 border border-red-700 rounded-lg">
-              <p className="text-red-300 text-sm">{error}</p>
+            <div className="mb-4 p-3 bg-red-100 border border-red-500 rounded-lg">
+              <p className="text-red-600 text-sm">{error}</p>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Name Input */}
+   
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="name" className="block text-sm font-medium text-gray-800 mb-2">
                 Full Name
               </label>
               <input
@@ -56,13 +56,13 @@ const Register = () => {
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
-                className="w-full px-4 py-3 bg-gray-900 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent transition duration-200"
+                className="w-full px-4 py-3 bg-white border border-gray-400 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent transition duration-200"
               />
             </div>
 
-            {/* Email Input */}
+    
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-800 mb-2">
                 Email Address
               </label>
               <input
@@ -72,13 +72,13 @@ const Register = () => {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
-                className="w-full px-4 py-3 bg-gray-900 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent transition duration-200"
+                className="w-full px-4 py-3 bg-white border border-gray-400 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent transition duration-200"
               />
             </div>
 
-            {/* Password Input */}
+         
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-800 mb-2">
                 Password
               </label>
               <input
@@ -88,27 +88,27 @@ const Register = () => {
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
-                className="w-full px-4 py-3 bg-gray-900 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent transition duration-200"
+                className="w-full px-4 py-3 bg-white border border-gray-400 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent transition duration-200"
               />
             </div>
 
-            {/* Submit Button */}
+          
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-900 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Creating Account...' : 'Create Account'}
             </button>
           </form>
 
-          {/* Login Link */}
+    
           <div className="mt-6 text-center">
-            <p className="text-gray-400 text-sm">
+            <p className="text-gray-700 text-sm">
               Already have an account?{' '}
               <a
                 href="/login"
-                className="text-white font-medium hover:underline transition duration-200"
+                className="text-black font-medium hover:underline transition duration-200"
               >
                 Sign in here
               </a>
@@ -116,12 +116,7 @@ const Register = () => {
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="mt-6 text-center">
-          <p className="text-gray-500 text-xs">
-            © 2025 Task Manager. All rights reserved.
-          </p>
-        </div>
+       
       </div>
     </div>
   );
