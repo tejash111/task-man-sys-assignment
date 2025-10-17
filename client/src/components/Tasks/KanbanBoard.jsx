@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { taskAPI } from '../../services/api';
-import TaskCard from './TaskCard';
 import TaskModal from './TaskModal';
 import { LoaderCircle } from 'lucide-react';
 
 const KanbanBoard = () => {
+  const navigate = useNavigate();
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
-  const [view, setView] = useState('board'); // 'board' or 'list'
+  const [view, setView] = useState('board'); 
 
   useEffect(() => {
     fetchTasks();
@@ -48,6 +49,10 @@ const KanbanBoard = () => {
     setShowModal(false);
     setEditingTask(null);
     fetchTasks();
+  };
+
+  const handleTaskClick = (taskId) => {
+    navigate(`/tasks/${taskId}`);
   };
 
   const getTasksByStatus = (status) => {
@@ -139,6 +144,7 @@ const KanbanBoard = () => {
                       <TaskCard
                         key={task._id}
                         task={task}
+                        onClick={handleTaskClick}
                         onEdit={handleEdit}
                         onDelete={handleDelete}
                       />
@@ -169,7 +175,7 @@ const KanbanBoard = () => {
                   </div>
                 ) : (
                   tasks.map((task) => (
-                    <div key={task._id} className="grid grid-cols-12 gap-4 px-6 py-4 hover:bg-gray-50 transition-colors">
+                    <div key={task._id} className="grid grid-cols-12 gap-4 px-6 py-4 hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => handleTaskClick(task._id)}>
          
                       <div className="col-span-4">
                         <h3 className="font-medium text-gray-900 mb-1">{task.title}</h3>
@@ -210,15 +216,15 @@ const KanbanBoard = () => {
                       </div>
 
  
-                      <div className="col-span-2 flex items-center bg-black justify-end gap-2">
+                      <div className="col-span-2 flex items-center justify-end gap-2">
                         <button
-                          onClick={() => handleEdit(task)}
+                          onClick={(e) => { e.stopPropagation(); handleEdit(task); }}
                           className="px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded transition-colors"
                         >
                           Edit
                         </button>
                         <button
-                          onClick={() => handleDelete(task._id)}
+                          onClick={(e) => { e.stopPropagation(); handleDelete(task._id); }}
                           className="px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded transition-colors"
                         >
                           Delete
@@ -246,3 +252,68 @@ const KanbanBoard = () => {
 };
 
 export default KanbanBoard;
+
+export const TaskCard = ({ task, onClick, onEdit, onDelete }) => {
+  const getPriorityColor = (priority) => {
+    switch (priority) {
+      case 'High': return 'text-red-500';
+      case 'Medium': return 'text-yellow-500';
+      case 'Low': return 'text-blue-500';
+      default: return 'text-gray-500';
+    }
+  };
+
+
+
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+  };
+
+  return (
+    <div 
+      className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow duration-200 cursor-pointer"
+      onClick={() => onClick(task._id)}
+    >
+      <div className="flex items-center justify-between mb-3">
+        <div className={`flex items-center gap-1 text-xs font-medium ${getPriorityColor(task.priority)}`}>
+          <span>▲</span>
+          <span className="uppercase">{task.priority} PRIORITY</span>
+        </div>
+      </div>
+
+   
+      <div className="flex items-center gap-2 mb-2">
+       
+        <h3 className="font-semibold text-gray-900">{task.title}</h3>
+      </div>
+
+      <p className="text-sm text-gray-500 mb-4">{formatDate(task.dueDate)}</p>
+
+
+      {task.description && (
+        <p className="text-sm bg-gray-100 p-1 rounded-lg text-gray-700 mb-3 line-clamp-2">{task.description}</p>
+      )}
+
+    
+
+  
+      <div className="flex gap-2 mt-3">
+        <button
+          onClick={(e) => { e.stopPropagation(); onEdit(task); }}
+          className="flex-1 px-3 py-1.5 text-xs border border-blue-300 text-blue-500 bg-blue-50 rounded hover:bg-blue-100 transition-colors"
+        >
+          Edit
+        </button>
+        <button
+          onClick={(e) => { e.stopPropagation(); onDelete(task._id); }}
+          className="flex-1 px-3 py-1.5 text-xs bg-red-100 text-red-500 border border-red-300 rounded hover:bg-red-200 transition-colors"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  );
+};
+

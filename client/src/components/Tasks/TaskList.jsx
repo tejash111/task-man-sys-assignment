@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { taskAPI } from '../../services/api';
 import Sidebar from '../layout/Sidebar';
 import Header from '../layout/Header';
-import TaskCard from './TaskCard';
 import TaskModal from './TaskModal';
 import { LayoutGrid, List, LoaderCircle } from 'lucide-react';
-import TaskFilters from './TaskFIlters';
+import TaskFilters from './taskFilters';
+import { TaskCard } from './KanbanBoard';
 
 const TaskList = () => {
+  const navigate = useNavigate();
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -53,6 +55,10 @@ const TaskList = () => {
     setShowModal(false);
     setEditingTask(null);
     fetchTasks();
+  };
+
+  const handleTaskClick = (taskId) => {
+    navigate(`/tasks/${taskId}`);
   };
 
   const getFilteredTasks = () => {
@@ -148,7 +154,7 @@ const TaskList = () => {
                 <div className="flex gap-6 h-full">
                   {columns.map((column) => (
                     <div key={column.id} className="flex-1 min-w-[320px]">
-                      {/* Column Header */}
+                
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
                           <div className={`w-2 h-2 rounded-full bg-${column.color}-500`}></div>
@@ -157,7 +163,7 @@ const TaskList = () => {
                         </div>
                       </div>
 
-                      {/* Task Cards */}
+                  
                       <div className="space-y-3 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 280px)' }}>
                         {column.tasks.length === 0 ? (
                           <div className="text-center py-8 text-gray-400 text-sm">
@@ -168,6 +174,7 @@ const TaskList = () => {
                             <TaskCard
                               key={task._id}
                               task={task}
+                              onClick={handleTaskClick}
                               onEdit={handleEdit}
                               onDelete={handleDelete}
                             />
@@ -200,6 +207,7 @@ const TaskList = () => {
                           <TaskItem
                             key={task._id}
                             task={task}
+                            onClick={handleTaskClick}
                             onEdit={handleEdit}
                             onDelete={handleDelete}
                           />
@@ -228,9 +236,12 @@ const TaskList = () => {
 export default TaskList;
 
 
-const TaskItem = ({ task, onDelete, onEdit }) => {
+const TaskItem = ({ task, onClick, onDelete, onEdit }) => {
   return (
-    <div className="grid grid-cols-12 gap-4 px-6 py-4 hover:bg-gray-50 transition-colors">
+    <div 
+      className="grid grid-cols-12 gap-4 px-6 py-4 hover:bg-gray-50 transition-colors cursor-pointer" 
+      onClick={() => onClick(task._id)}
+    >
       <div className="col-span-4">
         <h3 className="font-medium text-gray-900 mb-1">{task.title}</h3>
         {task.description && (
@@ -251,8 +262,8 @@ const TaskItem = ({ task, onDelete, onEdit }) => {
         {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : '-'}
       </div>
       <div className="col-span-2 flex items-center justify-end gap-2">
-        <button onClick={() => onEdit(task)} className="px-3 py-1.5 text-sm bg-blue-50  text-blue-500 hover:bg-blue-100 rounded transition-colors border border-blue-300">Edit</button>
-        <button onClick={() => onDelete(task._id)} className="px-3 py-1.5 text-sm text-red-500 border border-red-300 bg-red-50 hover:bg-gray-800 rounded transition-colors">Delete</button>
+        <button onClick={(e) => { e.stopPropagation(); onEdit(task); }} className="px-3 py-1.5 text-sm bg-blue-50  text-blue-500 hover:bg-blue-100 rounded transition-colors border border-blue-300">Edit</button>
+        <button onClick={(e) => { e.stopPropagation(); onDelete(task._id); }} className="px-3 py-1.5 text-sm text-red-500 border border-red-300 bg-red-50 hover:bg-gray-800 rounded transition-colors">Delete</button>
       </div>
     </div>
   );
